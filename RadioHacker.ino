@@ -11,7 +11,12 @@ char msg[6];
 
 bool sc1 = true;
 bool sc433 = false;
-bool sc315 = false;
+
+int numbers[7];
+
+int stepWrite=0;
+
+long sspb=0;
 
 String code,code1="",code2="",code3="",code4="";
 Adafruit_SSD1306 display(-1);
@@ -41,6 +46,12 @@ void setup() {
   
   mySwitch.enableReceive(1);
   rf_driver.init();
+
+  for(int j = 0 ; j<10 ; j++)
+  {
+    numbers[j]=0;
+    delay(5);
+  }
 }
 
 void loop() {
@@ -70,13 +81,13 @@ if(sc1)
       if(star == 0)
       {
         sc433 = true;
-        sc315 = false;
+        //sc315 = false;
         sc1   = false;
         screen433();
       }
       if(star == 1)
       {
-        sc315 = true;
+        //sc315 = true;
         sc433 = false;
         sc1   = false;
       }
@@ -208,7 +219,61 @@ if(sc433)
     }
     if(star == 1)
     {
-      //Writing
+      sc433=false;
+      writingDs();
+      mySwitch.enableTransmit(12);
+      S3:
+        while(digitalRead(5) == HIGH)
+        {
+          if(digitalRead(6) == LOW)
+              {
+                delay(60);
+                 numbers[stepWrite]++;
+                if(numbers[stepWrite] > 9)
+                {
+                  numbers[stepWrite] = 0;
+                }
+                writingDs();
+              }
+          if(digitalRead(2) == LOW)
+              {
+                delay(60);
+                numbers[stepWrite]--;
+                if(numbers[stepWrite] < 0)
+                {
+                  numbers[stepWrite] = 9;
+                }
+                writingDs();
+ 
+              }
+              if(digitalRead(4) == LOW)
+              {
+                //sending
+                mySwitch.send(sspb, 24);
+                delay(1000);
+              }
+          }
+          while(digitalRead(5) == LOW)
+          {
+            delay(60);
+            if(digitalRead(4) == LOW)
+            {
+              sc433=true;
+              return;
+            }
+          }
+          stepWrite++;
+          writingDs();
+          if(stepWrite >= 7)
+          {
+            stepWrite = 0;
+            writingDs();
+            goto S3;
+          }
+          else
+          {
+            goto S3;
+          }
     }
     if(star == 2)
     {
@@ -218,7 +283,7 @@ if(sc433)
        display.setTextSize(1);
        display.setTextColor(WHITE);
        display.setCursor(0,0);
-       display.println("Jamming On 433MHz");
+       display.println("Jamming");
        display.display();
        while(digitalRead(5) == HIGH)
        {
@@ -230,6 +295,18 @@ if(sc433)
 }
   
 
+}
+void writingDs(){
+      display.clearDisplay();
+      for(int i=0;i<7;i++)
+      {
+        display.setCursor(5+(i*7),16);
+        display.println(numbers[i]);
+      }
+      sspb = numbers[0]*1000000 + numbers[1] *100000 + numbers[2] *10000 + numbers[3] *1000 + numbers[4] *100 + numbers[5] *10 + numbers[6] *1;
+      display.setCursor(5+(stepWrite*7),24);
+      display.println("*");
+      display.display();
 }
 void RTX(){
   if(star >= com)
@@ -273,7 +350,7 @@ void screen433() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
-  display.println("Select the operation");
+  display.println("Operation");
   display.setCursor(10,8);
   display.println("Reading");
   display.setCursor(10,16);
