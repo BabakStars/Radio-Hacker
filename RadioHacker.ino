@@ -43,6 +43,11 @@ void setup() {
   pinMode(5,INPUT_PULLUP);        //Ne - pr
   pinMode(6,INPUT_PULLUP);        //Up
 
+  pinMode(A0,OUTPUT);        //Ne - pr
+  pinMode(A1,OUTPUT);        //Up
+
+  digitalWrite(A0,0);
+  digitalWrite(A1,0);
   
   mySwitch.enableReceive(1);
   rf_driver.init();
@@ -80,6 +85,8 @@ if(sc1)
     { delay(60);
       if(star == 0)
       {
+        digitalWrite(A0,0);
+        digitalWrite(A1,0);
         sc433 = true;
         //sc315 = false;
         sc1   = false;
@@ -87,6 +94,8 @@ if(sc1)
       }
       if(star == 1)
       {
+        digitalWrite(A0,1);
+        digitalWrite(A1,1);
         //sc315 = true;
         sc433 = false;
         sc1   = false;
