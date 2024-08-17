@@ -97,7 +97,7 @@ if(sc1)
         digitalWrite(A0,1);
         digitalWrite(A1,1);
         //sc315 = true;
-        sc433 = false;
+        sc433 = true;
         sc1   = false;
       }
     }
